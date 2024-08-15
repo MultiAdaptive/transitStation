@@ -50,7 +50,7 @@ type RPCDA struct {
 	Data       hexutil.Bytes  `json:"data"`
 	SignHash   []common.Hash  `json:"sign"`
 	TxHash     common.Hash    `json:"txhash"`
-	MetaData   []byte         `json:"metaData"`
+	MetaData   hexutil.Bytes  `json:"metaData"`
 }
 
 func NewServer(ctx context.Context, cfg *config.Config,logger *logrus.Logger) (*Server, error) {
