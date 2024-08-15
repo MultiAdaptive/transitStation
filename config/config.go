@@ -9,7 +9,6 @@ import (
 
 type Config struct {
 	ServerAddress string `mapstructure:"server_address"`
-	EthEndpoint   string `mapstructure:"eth_endpoint"`
 	PrivateKey    string `mapstructure:"private_key"`
 	NodeGroup     string `mapstructure:"node_group"`
 	Namespace     string `mapstructure:"namespace"`
