@@ -43,7 +43,6 @@ type Server struct {
 	storageManager *contract.StorageManager
 	cmManager      *contract.CommitmentManager
 	nodeManager    *contract.NodeManager
-	wg        sync.WaitGroup
 }
 
 type RPCDA struct {
@@ -54,7 +53,7 @@ type RPCDA struct {
 	Data       hexutil.Bytes  `json:"data"`
 	SignHash   []common.Hash  `json:"sign"`
 	TxHash     common.Hash    `json:"txhash"`
-	ExtraData  hexutil.Bytes  `json:"extraData"`
+	MetaData   hexutil.Bytes  `json:"metaData"`
 }
 
 func NewServer(ctx context.Context, cfg *config.Config, logger *logrus.Logger) (*Server, error) {
@@ -118,27 +117,10 @@ func NewServer(ctx context.Context, cfg *config.Config, logger *logrus.Logger) (
 
 func (s *Server) Start() error {
 	s.log.Infof("Starting server on %s", s.httpServer.Addr)
-	s.wg.Add(1)
-	go s.loop()
 	return s.httpServer.ListenAndServe()
 }
 
-func (s *Server) loop() {
-	ticker := time.NewTicker(10 * time.Second)
-	defer ticker.Stop()
-	for {
-		select {
-		case <-ticker.C:
-			s.log.Info("transit Station is running.......")
-		case <-s.ctx.Done():
-			s.log.Info("Stopping loop due to context cancellation.")
-			return
-		}
-	}
-}
-
 func (s *Server) Shutdown(ctx context.Context) error {
-	defer s.wg.Done()
 	s.log.Info("Shutting down server...")
 	return s.httpServer.Shutdown(ctx)
 }
