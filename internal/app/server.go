@@ -32,7 +32,6 @@ const (
 
 type Server struct {
 	httpServer *http.Server
-	mu         sync.Mutex
 	log         *logrus.Logger
 	auth         *bind.TransactOpts
 	SignerClient  *ethclient.Client
@@ -40,6 +39,7 @@ type Server struct {
 	config     *config.Config
 	ctx        context.Context
 	kzgCDK    *kzgsdk.MultiAdaptiveSdk
+	wg          sync.WaitGroup
 }
 
 type RPCDA struct {
@@ -92,12 +92,29 @@ func NewServer(ctx context.Context, cfg *config.Config,logger *logrus.Logger) (*
 	return srv, nil
 }
 
+func (s *Server) loop() {
+	ticker := time.NewTicker(10 * time.Second)
+	defer ticker.Stop()
+	for {
+		select {
+		case <-ticker.C:
+			s.log.Info("transit Station is running.......")
+		case <-s.ctx.Done():
+			s.log.Info("Stopping loop due to context cancellation.")
+			return
+		}
+	}
+}
+
 func (s *Server) Start() error {
+	s.wg.Add(1)
+	go s.loop()
 	s.log.Infof("Starting server on %s", s.httpServer.Addr)
 	return s.httpServer.ListenAndServe()
 }
 
 func (s *Server) Shutdown(ctx context.Context) error {
+	defer s.wg.Done()
 	s.log.Info("Shutting down server...")
 	return s.httpServer.Shutdown(ctx)
 }
