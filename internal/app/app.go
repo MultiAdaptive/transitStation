@@ -7,7 +7,6 @@ import (
 	"os"
 	"os/signal"
 	"syscall"
-	"time"
 )
 
 type App struct {
@@ -24,8 +23,6 @@ func NewApp(cfg *config.Config) *App {
 func (a *App) Start() error {
 	log := GetLogger()
 	ctx, cancel := context.WithCancel(context.Background())
-	defer cancel()
-
 	// Initialize and start the server
 	srv, err := NewServer(ctx, a.config, log)
 	if err != nil {
@@ -45,16 +42,15 @@ func (a *App) Start() error {
 	quit := make(chan os.Signal, 1)
 	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
 
-	// Block until we receive a signal
-	<-quit
-	log.Info("Shutting down server...")
-
-	// Create a context with a timeout for the shutdown
-	shutdownCtx, shutdownCancel := context.WithTimeout(ctx, 5*time.Second)
-	defer shutdownCancel()
+	select {
+	case <-quit:
+		// Block until we receive a signal
+		cancel()
+		log.Info("Shutting down server...")
+	}
 
 	// Attempt to gracefully shutdown the server
-	if err := srv.Shutdown(shutdownCtx); err != nil {
+	if err := srv.Shutdown(ctx); err != nil {
 		log.Errorf("Server forced to shutdown: %v", err)
 	}
 
