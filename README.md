@@ -48,6 +48,8 @@ Use "transitStation [command] --help" for more information about a command.
 
 ps: 
 
+This is an example for how to start the implementation procedures.
+
 ```
 cd transitStation/build
 ./transitStation --config $HOME/.transitStationConfig.yaml start
