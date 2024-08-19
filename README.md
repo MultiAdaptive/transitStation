@@ -29,6 +29,7 @@ Use the command ‘make’ on your terminal in the path of transitStation folder
 
 This is a transit station that is compatible with OP, EigenDA and other DA projects that can support MultiAdaptiveClient DA services
 
+```
 Usage:
   transitStation [command]
 
@@ -42,6 +43,8 @@ Flags:
       -h, --help            help for transitStation
 
 Use "transitStation [command] --help" for more information about a command.
+
+```
 
 ps: 
 
