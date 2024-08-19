@@ -17,6 +17,10 @@ chainID: 11155111
 url: "the eth net scan url "
 ```
 
+## How can you get parames Nodegroup or Namespace
+
+As a user who want to use this transitStation get the `node_group` or `namespace` parames is necessory, you can use this Tools by this url: [https://github.com/MultiAdaptive/multiAdaptive-cli](https://github.com/MultiAdaptive/multiAdaptive-cli) then check README **Register NodeGroup** by this URL:[https://github.com/MultiAdaptive/multiAdaptive-cli?tab=readme-ov-file#register-nodegroup](https://github.com/MultiAdaptive/multiAdaptive-cli?tab=readme-ov-file#register-nodegroup) or **Register NameSpace** by this URL:[https://github.com/MultiAdaptive/multiAdaptive-cli?tab=readme-ov-file#register-namespace](https://github.com/MultiAdaptive/multiAdaptive-cli?tab=readme-ov-file#register-namespace)
+
 ## Make execution
 
 Use the command ‘make’ on your terminal in the path of transitStation folder.
