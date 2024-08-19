@@ -38,12 +38,13 @@ Available Commands:
   start       Start the relay server
 
 Flags:
-      --config string   config file (default is $HOME/.transitStationConfig.yaml)
-  -h, --help            help for transitStation
+      --config string       config file (default is $HOME/.transitStationConfig.yaml)
+      -h, --help            help for transitStation
 
 Use "transitStation [command] --help" for more information about a command.
 
 ps: 
+
 ```
 cd transitStation/build
 ./transitStation --config $HOME/.transitStationConfig.yaml start
