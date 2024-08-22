@@ -1,7 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="d7032f66-8c6a-45b3-b83c-c1f789d14339" name="Default Changelist" comment="" />
+    <list default="true" id="d7032f66-8c6a-45b3-b83c-c1f789d14339" name="Default Changelist" comment="">
+      <change afterPath="$PROJECT_DIR$/config/config.yaml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/internal/app/server.go" beforeDir="false" afterPath="$PROJECT_DIR$/internal/app/server.go" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -52,15 +56,19 @@
     <integration-enabled>true</integration-enabled>
   </component>
   <component name="WindowStateProjectService">
-    <state x="421" y="205" width="597" height="490" key="find.popup" timestamp="1723535199462">
+    <state x="520" y="384" key="#GOROOT" timestamp="1724227542076">
+      <screen x="0" y="0" width="1440" height="900" />
+    </state>
+    <state x="520" y="384" key="#GOROOT/0.0.1440.900@0.0.1440.900" timestamp="1724227542076" />
+    <state x="421" y="205" width="597" height="490" key="find.popup" timestamp="1724310195788">
       <screen x="0" y="0" width="1440" height="900" />
     </state>
     <state x="421" y="205" width="597" height="490" key="find.popup/0.0.1440.900/1440.25.1920.1055@0.0.1440.900" timestamp="1723535199462" />
-    <state x="421" y="205" width="597" height="490" key="find.popup/0.0.1440.900@0.0.1440.900" timestamp="1723438457917" />
-    <state x="385" y="196" width="670" height="676" key="search.everywhere.popup" timestamp="1723430967436">
+    <state x="421" y="205" width="597" height="490" key="find.popup/0.0.1440.900@0.0.1440.900" timestamp="1724310195788" />
+    <state x="385" y="196" width="670" height="676" key="search.everywhere.popup" timestamp="1724310947260">
       <screen x="0" y="0" width="1440" height="900" />
     </state>
-    <state x="385" y="196" width="670" height="676" key="search.everywhere.popup/0.0.1440.900@0.0.1440.900" timestamp="1723430967436" />
+    <state x="385" y="196" width="670" height="676" key="search.everywhere.popup/0.0.1440.900@0.0.1440.900" timestamp="1724310947260" />
     <state x="450" y="366" key="vcs.readOnlyHandler.ReadOnlyStatusDialog" timestamp="1723446734163">
       <screen x="0" y="0" width="1440" height="900" />
     </state>

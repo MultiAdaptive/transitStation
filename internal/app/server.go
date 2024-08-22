@@ -1,10 +1,14 @@
 package app
 
 import (
+	"bytes"
 	"context"
+	"errors"
 	"fmt"
 	"github.com/MultiAdaptive/transitStation/config"
 	"github.com/MultiAdaptive/transitStation/contract"
+	"github.com/consensys/gnark-crypto/ecc/bn254/fr/kzg"
+	"github.com/ethereum/go-ethereum/accounts/abi"
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/common/hexutil"
@@ -27,6 +31,9 @@ const (
 	storageManagerAddress = "0x44214b40b88BeD3424b2684bE6b102fD3BCA4a09"
 	cmManagerAddress      = "0xb945872cbF327DA5CBEb6aE7286ccEE6CAaBA3B2"
 	nodeManagerAddress    = "0xed592c8F0B13bb8A761BFFb6140720D89552999B"
+	method              = "submitCommitment"
+	gasLimit            = 500000 //The limitations set by gas are simply to prevent underestimated projections arising from the submission of the contract object.
+	contractABI         = `[{"inputs":[],"stateMutability":"nonpayable","type":"constructor"},{"anonymous":false,"inputs":[{"indexed":false,"internalType":"uint8","name":"version","type":"uint8"}],"name":"Initialized","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"previousOwner","type":"address"},{"indexed":true,"internalType":"address","name":"newOwner","type":"address"}],"name":"OwnershipTransferred","type":"event"},{"anonymous":false,"inputs":[{"components":[{"internalType":"uint256","name":"X","type":"uint256"},{"internalType":"uint256","name":"Y","type":"uint256"}],"indexed":false,"internalType":"struct Pairing.G1Point","name":"commitment","type":"tuple"},{"indexed":false,"internalType":"uint256","name":"timestamp","type":"uint256"},{"indexed":false,"internalType":"uint256","name":"nonce","type":"uint256"},{"indexed":false,"internalType":"uint256","name":"index","type":"uint256"},{"indexed":false,"internalType":"uint256","name":"len","type":"uint256"},{"indexed":false,"internalType":"bytes32","name":"nodeGroupKey","type":"bytes32"},{"indexed":false,"internalType":"bytes32","name":"nameSpaceKey","type":"bytes32"},{"indexed":false,"internalType":"bytes[]","name":"signatures","type":"bytes[]"}],"name":"SendDACommitment","type":"event"},{"inputs":[],"name":"baseFee","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"uint256","name":"","type":"uint256"}],"name":"commitments","outputs":[{"internalType":"uint256","name":"X","type":"uint256"},{"internalType":"uint256","name":"Y","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"bytes32","name":"","type":"bytes32"}],"name":"daDetails","outputs":[{"internalType":"uint256","name":"timestamp","type":"uint256"},{"internalType":"bytes32","name":"hashSignatures","type":"bytes32"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"uint256","name":"_nonce","type":"uint256"}],"name":"getDADetailsByNonce","outputs":[{"components":[{"internalType":"uint256","name":"timestamp","type":"uint256"},{"internalType":"bytes32","name":"hashSignatures","type":"bytes32"}],"internalType":"struct CommitmentManager.DADetails","name":"","type":"tuple"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"_user","type":"address"},{"internalType":"uint256","name":"_index","type":"uint256"}],"name":"getDADetailsByUserAndIndex","outputs":[{"components":[{"internalType":"uint256","name":"timestamp","type":"uint256"},{"internalType":"bytes32","name":"hashSignatures","type":"bytes32"}],"internalType":"struct CommitmentManager.DADetails","name":"","type":"tuple"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"bytes32","name":"_nameSpaceKey","type":"bytes32"},{"internalType":"uint256","name":"_index","type":"uint256"}],"name":"getNameSpaceCommitment","outputs":[{"components":[{"internalType":"uint256","name":"X","type":"uint256"},{"internalType":"uint256","name":"Y","type":"uint256"}],"internalType":"struct Pairing.G1Point","name":"","type":"tuple"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"_user","type":"address"},{"internalType":"uint256","name":"_index","type":"uint256"}],"name":"getUserCommitment","outputs":[{"components":[{"internalType":"uint256","name":"X","type":"uint256"},{"internalType":"uint256","name":"Y","type":"uint256"}],"internalType":"struct Pairing.G1Point","name":"","type":"tuple"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"","type":"address"}],"name":"indices","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"contract NodeManager","name":"_nodeManager","type":"address"},{"internalType":"contract StorageManager","name":"_storageManagement","type":"address"}],"name":"initialize","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"bytes32","name":"","type":"bytes32"},{"internalType":"uint256","name":"","type":"uint256"}],"name":"nameSpaceCommitments","outputs":[{"internalType":"uint256","name":"X","type":"uint256"},{"internalType":"uint256","name":"Y","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"bytes32","name":"","type":"bytes32"}],"name":"nameSpaceIndex","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"nodeManager","outputs":[{"internalType":"contract NodeManager","name":"","type":"address"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"nonce","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"owner","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"renounceOwnership","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"uint256","name":"_newFee","type":"uint256"}],"name":"setBaseFee","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[],"name":"storageManagement","outputs":[{"internalType":"contract StorageManager","name":"","type":"address"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"uint256","name":"_length","type":"uint256"},{"internalType":"uint256","name":"_timeout","type":"uint256"},{"internalType":"bytes32","name":"_nameSpaceKey","type":"bytes32"},{"internalType":"bytes32","name":"_nodeGroupKey","type":"bytes32"},{"internalType":"bytes[]","name":"_signatures","type":"bytes[]"},{"components":[{"internalType":"uint256","name":"X","type":"uint256"},{"internalType":"uint256","name":"Y","type":"uint256"}],"internalType":"struct Pairing.G1Point","name":"_commitment","type":"tuple"}],"name":"submitCommitment","outputs":[],"stateMutability":"payable","type":"function"},{"inputs":[{"internalType":"address","name":"newOwner","type":"address"}],"name":"transferOwnership","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"address","name":"","type":"address"},{"internalType":"uint256","name":"","type":"uint256"}],"name":"userCommitments","outputs":[{"internalType":"uint256","name":"X","type":"uint256"},{"internalType":"uint256","name":"Y","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"version","outputs":[{"internalType":"string","name":"","type":"string"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"withdraw","outputs":[],"stateMutability":"nonpayable","type":"function"}]`
 )
 
 type Server struct {
@@ -141,89 +148,22 @@ func (s *Server) putWithoutCommitmentHandler(w http.ResponseWriter, r *http.Requ
 		return
 	}
 	cm, proof, err := s.kzgCDK.GenerateDataCommitAndProof(data)
-	if err != nil {
-		s.log.Fatalf("kzgsdk GenerateDataCommitAndProof Error: %s", err)
-		http.Error(w, "kzgsdk GenerateDataCommitAndProof Error", http.StatusBadRequest)
-		return
-	}
-	nodeGroupKey := common.HexToHash(s.config.NodeGroup)
-	nameSpaceKey := common.HexToHash(s.config.Namespace)
-	nodeGroup, err := s.storageManager.NODEGROUP(nil, nodeGroupKey)
-	if err != nil {
-		s.log.Fatalf("NODEGROUP----failed error:%s", err)
-		http.Error(w, "NODEGROUP failed", http.StatusBadRequest)
-		return
-	}
-
-	signatures := make([][]byte, 0)
-	errList := make([]error, 0)
-	timeNow := time.Now()
-	timeOut := timeNow.Add(24 * time.Hour).Unix()
-	sender := s.auth.From
-	index, err := s.cmManager.Indices(nil, sender)
-	length := len(data)
-	result := make([]byte, 0)
-	result = append(result, 1)
-	result = append(result, cm.Marshal()...)
-	s.log.Printf("cm string:%s", common.Bytes2Hex(result))
-	s.log.Println("transit Station is prepare getting signature")
-	for _, add := range nodeGroup.Addrs {
-		info, err := s.nodeManager.BroadcastingNodes(nil, add)
+	if err == nil {
+		err = s.getSignatureAndSubmitToChain(cm,proof,data,[]byte{})
+		result := make([]byte,0)
+		result = append(result, 1)
+		result = append(result, cm.Marshal()...)
+		w.Header().Set("Content-Type", "application/octet-stream")
 		if err != nil {
-			continue
+			w.WriteHeader(http.StatusBadRequest)
+		}else {
+			s.log.Printf("cm string:%s", common.Bytes2Hex(cm.Marshal()))
+			w.WriteHeader(http.StatusOK)
+			w.Write(result)
 		}
-		s.SignerClient, err = ethclient.Dial(info.Url)
-		if err != nil {
-			s.log.Fatalf("Getting connection with url:%s err:%s", info.Url, err)
-			http.Error(w, "Getting connection Error", http.StatusBadRequest)
-		}
-		claimedValue := proof.ClaimedValue.Marshal()
-		s.log.Printf("transit Station is getting signature with url:%s", info.Url)
-		result, err := s.getSignature(sender, index.Uint64(), uint64(length), cm.Marshal(), data, nodeGroupKey, proof.H.Marshal(), claimedValue, uint64(timeOut), result)
-		if err != nil {
-			s.log.Printf("sendDAByParams--err:%s", err.Error())
-			errList = append(errList, err)
-			continue
-		}
-		signatures = append(signatures, result)
-	}
-
-	if len(signatures) == 0 && len(errList) > 0 {
-		s.log.Printf("send to signature failed  error:%s", errList[0])
-		http.Error(w, "send to signature failed", http.StatusBadRequest)
-		return
-	}
-
-	commitData := contract.PairingG1Point{
-		X: new(big.Int).SetBytes(cm.X.Marshal()),
-		Y: new(big.Int).SetBytes(cm.Y.Marshal()),
-	}
-	s.log.Println("transit Station is prepare send signature to contract")
-	tx, err := s.cmManager.SubmitCommitment(s.auth, new(big.Int).SetInt64(int64(length)), new(big.Int).SetInt64(timeOut), nameSpaceKey, nodeGroupKey, signatures, commitData)
-	if err != nil {
-		s.log.Printf("SubmitCommitment failed:%s", err.Error())
-		http.Error(w, "SubmitCommitment failed", http.StatusBadRequest)
-		return
-	}
-	// 等待交易被打包并获取交易哈希
-	s.log.Printf("SubmitCommitment tx Hash:%s", tx.Hash().Hex())
-	// 等待交易被确认
-	receipt, err := bind.WaitMined(s.ctx, s.SenderClient, tx)
-	if err != nil {
-		errStr := fmt.Sprintf("cant WaitMined by contract address err:%s", err.Error())
-		s.log.Fatal(errStr)
-		http.Error(w, errStr, http.StatusBadRequest)
-		return
-	}
-	w.Header().Set("Content-Type", "application/octet-stream")
-	if receipt.Status == types.ReceiptStatusFailed {
-		s.log.Fatal("transaction failed tx Hash:%s", tx.Hash().Hex())
-		w.WriteHeader(http.StatusInternalServerError)
-	} else {
-		s.log.Printf("transaction successful tx Hash:%s", tx.Hash().Hex())
-		s.log.Printf("cm string:%s", common.Bytes2Hex(cm.Marshal()))
-		w.WriteHeader(http.StatusOK)
-		w.Write(result)
+	}else {
+		s.log.Printf("kzgsdk GenerateDataCommitAndProof Error: %s", err)
+		w.WriteHeader(http.StatusBadRequest)
 	}
 }
 
@@ -253,20 +193,27 @@ func (s *Server) putWithCommitmentHandler(w http.ResponseWriter, r *http.Request
 	s.log.Printf("transitStation is handling post commitment")
 	cm, proof, err := s.kzgCDK.GenerateDataCommitAndProof(preimage)
 	if err != nil {
-		s.log.Fatalf("kzgsdk GenerateDataCommitAndProof Error: %s", err)
-		http.Error(w, "kzgsdk GenerateDataCommitAndProof Error", http.StatusBadRequest)
+		s.log.Printf("kzgsdk GenerateDataCommitAndProof Error: %s", err)
+		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
+	err = s.getSignatureAndSubmitToChain(cm,proof,preimage,commitmentByte)
+	w.Header().Set("Content-Type", "application/octet-stream")
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+	}else {
+		w.WriteHeader(http.StatusOK)
+	}
+}
 
+func (s *Server) getSignatureAndSubmitToChain(cm kzg.Digest,proof kzg.OpeningProof,preimage []byte,commitmentByte []byte) error {
 	nodeGroupKey := common.HexToHash(s.config.NodeGroup)
 	nameSpaceKey := common.HexToHash(s.config.Namespace)
 	nodeGroup, err := s.storageManager.NODEGROUP(nil, nodeGroupKey)
 	if err != nil {
-		s.log.Fatalf("NODEGROUP----failed error:%s", err)
-		http.Error(w, "Get NODEGROUP Error", http.StatusBadRequest)
-		return
+		s.log.Printf("NODEGROUP----failed error:%s", err)
+		return err
 	}
-
 	signatures := make([][]byte, 0)
 	errList := make([]error, 0)
 	timeNow := time.Now()
@@ -274,62 +221,97 @@ func (s *Server) putWithCommitmentHandler(w http.ResponseWriter, r *http.Request
 	sender := s.auth.From
 	index, err := s.cmManager.Indices(nil, sender)
 	length := len(preimage)
-	s.log.Printf("transitStation is prepare getting signature commitment:%s", commitment)
-	for _, add := range nodeGroup.Addrs {
+	result := make([]byte, 0)
+	if bytes.Compare(commitmentByte,[]byte{}) == 0 {
+		//without commit
+		result = append(result, 1)
+		result = append(result, cm.Marshal()...)
+		s.log.Printf("cm string:%s", common.Bytes2Hex(result))
+	}else {
+		result = commitmentByte
+	}
+	s.log.Printf("transitStation is prepare getting signature commitment:%s", common.Bytes2Hex(cm.Marshal()))
+	requestAddr,_ := s.storageManager.SortAddresses(nil,nodeGroup.Addrs)
+	for _, add := range requestAddr {
 		info, err := s.nodeManager.BroadcastingNodes(nil, add)
 		if err != nil {
 			continue
 		}
 		s.SignerClient, err = ethclient.Dial(info.Url)
 		if err != nil {
-			s.log.Fatalf("Getting connection with url:%s err:%s", info.Url, err)
-			http.Error(w, "Getting connection Error", http.StatusBadRequest)
+			s.log.Printf("Getting connection with url:%s err:%s", info.Url, err)
+			return err
 		}
 		s.log.Printf("transit Station is getting signature with url:%s", info.Url)
 		claimedValue := proof.ClaimedValue.Marshal()
-		result, err := s.getSignature(sender, index.Uint64(), uint64(length), cm.Marshal(), preimage, nodeGroupKey, proof.H.Marshal(), claimedValue, uint64(timeOut), commitmentByte)
+		sign, err := s.getSignature(sender, index.Uint64(), uint64(length), cm.Marshal(), preimage, nodeGroupKey, proof.H.Marshal(), claimedValue, uint64(timeOut), result)
 		if err != nil {
 			log.Println(err.Error())
 			errList = append(errList, err)
 			continue
 		}
-		signatures = append(signatures, result)
+		signatures = append(signatures, sign)
 	}
 	if len(signatures) == 0 && len(errList) > 0 {
 		s.log.Printf("send to signature failed  error:%s", errList[0])
-		http.Error(w, "Get NODEGROUP Error", http.StatusBadRequest)
-		return
+		return errors.New("get signature failed")
 	}
 
 	commitData := contract.PairingG1Point{
 		X: new(big.Int).SetBytes(cm.X.Marshal()),
 		Y: new(big.Int).SetBytes(cm.Y.Marshal()),
 	}
-	s.log.Printf("transitStation is prepare getting signature commitment:%s", commitment)
-	tx, err := s.cmManager.SubmitCommitment(s.auth, new(big.Int).SetInt64(int64(length)), new(big.Int).SetInt64(timeOut), nameSpaceKey, nodeGroupKey, signatures, commitData)
+
+	addr := s.auth.From
+	currentNonce,err := s.SenderClient.PendingNonceAt(s.ctx,addr)
+	gasPrice, err := s.SenderClient.SuggestGasPrice(context.Background())
 	if err != nil {
-		s.log.Printf("SubmitCommitment failed:%s", err.Error())
-		http.Error(w, "SubmitCommitment failed", http.StatusBadRequest)
-		return
+		s.log.Errorf("Failed to suggest gas price: %v",err)
+		return errors.New("Failed to suggest gas price")
 	}
-	// 等待交易被打包并获取交易哈希
-	log.Printf("SubmitCommitment tx Hash:%s", tx.Hash().Hex())
-	// 等待交易被确认
-	receipt, err := bind.WaitMined(s.ctx, s.SenderClient, tx)
+
+	abiGen,err := abi.JSON(strings.NewReader(contractABI))
 	if err != nil {
-		errStr := fmt.Sprintf("cant WaitMined by contract address err:%s", err.Error())
-		s.log.Fatal(errStr)
-		http.Error(w, errStr, http.StatusBadRequest)
-		return
+		return errors.New("load abi failed")
 	}
-	w.Header().Set("Content-Type", "application/octet-stream")
-	if receipt.Status == types.ReceiptStatusFailed {
-		s.log.Fatalf("transaction failed tx Hash:%s", tx.Hash().Hex())
-		w.WriteHeader(http.StatusInternalServerError)
-	} else {
-		s.log.Printf("transaction successful tx Hash:%s", tx.Hash().Hex())
-		w.WriteHeader(http.StatusOK)
+
+	inner,err := abiGen.Pack(method, new(big.Int).SetInt64(int64(length)), new(big.Int).SetInt64(timeOut), nameSpaceKey, nodeGroupKey, signatures, commitData)
+	if err != nil {
+		return errors.New("abi pack transaction params failed")
 	}
+	tx := types.NewTransaction(currentNonce,common.HexToAddress(cmManagerAddress),new(big.Int).SetUint64(0),gasLimit,gasPrice,inner)
+	// 签名交易
+	chainID := big.NewInt(int64(s.config.ChainID)) // 以太坊主网的 chain ID
+	privateKeyECDSA, err := crypto.HexToECDSA(s.config.PrivateKey)
+	if err ==  nil {
+		signedTx, err := types.SignTx(tx, types.NewEIP155Signer(chainID), privateKeyECDSA)
+		if err == nil {
+			s.log.Printf("SubmitCommitment tx Hash:%s", signedTx.Hash().Hex())
+			err = s.SenderClient.SendTransaction(context.Background(), signedTx)
+			if err == nil {
+				receipt, err := bind.WaitMined(s.ctx, s.SenderClient, signedTx)
+				if err != nil {
+					errStr := fmt.Sprintf("cant WaitMined by contract address err:%s", err.Error())
+					s.log.Println(errStr)
+					return errors.New(errStr)
+				}
+				if receipt.Status == types.ReceiptStatusFailed {
+					s.log.Errorf("transaction failed tx Hash:%s", signedTx.Hash().Hex())
+					return errors.New("transaction failed")
+				} else {
+					s.log.Printf("transaction successful tx Hash:%s", signedTx.Hash().Hex())
+				}
+			}else {
+				s.log.Errorf("Failed to send transaction: %v", err)
+				return errors.New("Failed to send transaction")
+			}
+		}else {
+			return err
+		}
+	}else {
+		return err
+	}
+	return nil
 }
 
 func (s *Server) getSignature(sender common.Address, index, length uint64, commitment, data []byte, nodeGroupKey [32]byte, proof, claimedValue []byte, timeout uint64, extraData []byte) ([]byte, error) {
