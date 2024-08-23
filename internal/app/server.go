@@ -281,7 +281,7 @@ func (s *Server) getSignatureAndSubmitToChain(cm kzg.Digest,proof kzg.OpeningPro
 	}
 	tx := types.NewTransaction(currentNonce,common.HexToAddress(cmManagerAddress),new(big.Int).SetUint64(0),gasLimit,gasPrice,inner)
 	// 签名交易
-	chainID := big.NewInt(int64(s.config.ChainID)) // 以太坊主网的 chain ID
+	chainID := big.NewInt(int64(s.config.ChainID))
 	privateKeyECDSA, err := crypto.HexToECDSA(s.config.PrivateKey)
 	if err ==  nil {
 		signedTx, err := types.SignTx(tx, types.NewEIP155Signer(chainID), privateKeyECDSA)
