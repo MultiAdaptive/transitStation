@@ -1,6 +1,13 @@
 # transitStation
 This is a transit station that is compatible with OP, EigenDA and other DA projects that can support MultiAdaptiveClient DA services
 
+## Git clone 
+
+First of all,you should git clone this repository in your local place.
+
+```
+git clone https://github.com/MultiAdaptive/transitStation.git 
+```
 ## Set config file 
 
 You should set the config yaml file like this example :
