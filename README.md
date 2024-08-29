@@ -19,7 +19,7 @@ server_address: ":8080"
 private_key: "your_privatekey"
 node_group: "your_node_group_here"
 namespace: "your_namespace_here"
-log_level: "info"  # 可以设置为 debug, info, warn, error, fatal
+log_level: "info"  # the value can be debug, info, warn, error, or fatal
 chainID: 11155111
 url: "the eth net scan url "
 ```
