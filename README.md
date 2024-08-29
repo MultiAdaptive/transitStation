@@ -26,7 +26,39 @@ url: "the eth net scan url "
 
 ## How can you get parames Nodegroup or Namespace
 
-As a user who want to use this transitStation get the `node_group` or `namespace` parames is necessory, you can use this Tools by this url: [https://github.com/MultiAdaptive/multiAdaptive-cli](https://github.com/MultiAdaptive/multiAdaptive-cli) then check README **Register NodeGroup** by this URL:[https://github.com/MultiAdaptive/multiAdaptive-cli?tab=readme-ov-file#register-nodegroup](https://github.com/MultiAdaptive/multiAdaptive-cli?tab=readme-ov-file#register-nodegroup) or **Register NameSpace** by this URL:[https://github.com/MultiAdaptive/multiAdaptive-cli?tab=readme-ov-file#register-namespace](https://github.com/MultiAdaptive/multiAdaptive-cli?tab=readme-ov-file#register-namespace) You can `Regist` or `Get` these parames Value.
+As a user who want to use this transitStation get the `NodeGroup` or `NameSpace` parames is necessory, you can use this Tools by this url: [multiAdaptive-cli](https://github.com/MultiAdaptive/multiAdaptive-cli).
+
+NodeGroup: A group of broadcast nodes, with a specified minimum number of signatures required. The broadcast node is responsible for receiving and signing the data, and then forwarding the data.  
+NameSpace: A group of storage nodes. Storage nodes store data for a long time.  
+
+#### Build
+
+  ```bash
+    make build
+  ```
+
+#### Register NodeGroup
+1. Run multiAdaptive-cli
+
+```bash
+./build/multiAdaptive-cli -privateKey="<your privateKey>" -advanced
+```
+
+2. Select Register NodeGroup.
+3. Enter the list of broadcast node addresses, separated by commas.
+4. Enter the minimum number of signatures.
+5. Obtain the nodeGroupKey (used for advanced testing).
+
+#### Register NameSpace
+1. Run multiAdaptive-cli
+
+```bash
+./build/multiAdaptive-cli -privateKey="<your privateKey>" -advanced
+```
+
+2. Select Register NameSpace.
+3. Enter the list of storage node addresses, separated by commas.
+4. Obtain the nameSpaceKey (used for advanced testing).
 
 ## Make execution
 
